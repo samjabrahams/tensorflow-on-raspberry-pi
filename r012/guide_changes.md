@@ -27,6 +27,7 @@ in tmp.sh:
 #!/bin/bash
 export PROTOC=`which protoc`
 export GRPC_JAVA_PLUGIN=../grpc-java/compiler/build/exe/java_plugin/protoc-gen-grpc-java
+./compile.sh
 ```
 ```
 chmod +x tmp.sh
