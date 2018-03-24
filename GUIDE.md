@@ -186,6 +186,12 @@ return "arm"
 ...
 ```
 
+You are going to need the Java JDK:
+
+```shell
+sudo apt-get install openjdk-8-jdk
+```
+
 Now we can build Bazel! _Note: this also takes some time._
 
 ```shell
