@@ -165,13 +165,13 @@ run "${JAVAC}" -classpath "${classpath}" -sourcepath "${sourcepath}" \
       -encoding UTF-8 "@${paramfile}" -J-Xmx500M
 ```
 
-Finally, we have to add one thing to `tools/cpp/cc_configure.bzl` - open it up for editing:
+Finally, we have to add one thing to `tools/cpp/lib_cc_configure.bzl` - open it up for editing:
 
 ```shell
-nano tools/cpp/cc_configure.bzl
+nano tools/cpp/lib_cc_configure.bzl
 ```
 
-Place the line `return "arm"` around line 133 (at the beginning of the `_get_cpu_value` function):
+Place the line `return "arm"` around line 93 (at the beginning of the `_get_cpu_value` function):
 
 ```shell
 ...
@@ -180,10 +180,10 @@ return "arm"
 ...
 ```
 
-You are going to need the Java JDK:
+You are going to need the Oracle Java JDK. (The openjdk version errors out):
 
 ```shell
-sudo apt-get install openjdk-8-jdk
+TODO
 ```
 
 Now we can build Bazel! _Note: this also takes some time._
