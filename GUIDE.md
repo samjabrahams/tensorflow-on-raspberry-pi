@@ -261,59 +261,8 @@ Once in the directory, we have to write a nifty one-liner that is incredibly imp
 ```shell
 grep -Rl 'lib64' | xargs sed -i 's/lib64/lib/g'
 ```
-Updating tensorflow/core/platform/platform.h and WORKSPACE as listed in the previous version is no longer needed with the latest version of tensorflow.
-* the IS_MOBILE_PLATFORM check now includes a specific check for the Raspberry
-* numeric/1.2.6 is no longer listed WORKSPACE
 
-Finally, we have to replace the eigen version dependency. The version included in the current tensorflow version may result in an error (near the end of the build):
-
-```shell
-ERROR: /mnt/tensorflow/tensorflow/core/kernels/BUILD:2128:1: C++ compilation of rule '//tensorflow/core/kernels:svd_op' failed: gcc failed: error executing command 
-...com.google.devtools.build.lib.shell.BadExitStatusException: Process exited with status 1.
-...
-external/eigen_archive/Eigen/src/Jacobi/Jacobi.h:359:55: error: 'struct Eigen::internal::conj_helper<__vector(4) __builtin_neon_sf, Eigen::internal::Packet2cf, false, false>' has no member named 'pmul'
-```
-
-to resolve this 
-
-```shell
-sudo nano tensorflow/workspace.bzl
-```
-
-Replace the following
-
-```
-  native.new_http_archive(
-      name = "eigen_archive",
-      urls = [
-          "http://mirror.bazel.build/bitbucket.org/eigen/eigen/get/f3a22f35b044.tar.gz",
-          "https://bitbucket.org/eigen/eigen/get/f3a22f35b044.tar.gz",
-      ],
-      sha256 = "ca7beac153d4059c02c8fc59816c82d54ea47fe58365e8aded4082ded0b820c4",
-      strip_prefix = "eigen-eigen-f3a22f35b044",
-      build_file = str(Label("//third_party:eigen.BUILD")),
-  )
-```
-
-with
-
-```
-  native.new_http_archive(
-      name = "eigen_archive",
-      urls = [
-          "http://mirror.bazel.build/bitbucket.org/eigen/eigen/get/d781c1de9834.tar.gz",
-          "https://bitbucket.org/eigen/eigen/get/d781c1de9834.tar.gz",
-      ],
-      sha256 = "a34b208da6ec18fa8da963369e166e4a368612c14d956dd2f9d7072904675d9b",
-      strip_prefix = "eigen-eigen-d781c1de9834",
-      build_file = str(Label("//third_party:eigen.BUILD")),
-  )
-```
-
-Reference: https://stackoverflow.com/questions/44418657/how-to-build-eigen-with-arm-neon-compile-error-for-tensorflow
-
-**These options have changed with exception of jemalloc use No for all**
-Now let's configure the build:
+Now let's configure the build. **These options have changed with exception of jemalloc use No for all**
 
 ```shell
 ./configure
