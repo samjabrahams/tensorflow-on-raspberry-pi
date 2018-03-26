@@ -171,7 +171,7 @@ Finally, we have to add one thing to `tools/cpp/lib_cc_configure.bzl` - open it 
 nano tools/cpp/lib_cc_configure.bzl
 ```
 
-Place the line `return "arm"` around line 93 (at the beginning of the `_get_cpu_value` function):
+Place the line `return "arm"` around line 93 (at the beginning of the `get_cpu_value` function):
 
 ```shell
 ...
