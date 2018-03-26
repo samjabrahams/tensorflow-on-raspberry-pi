@@ -253,8 +253,11 @@ First things first, clone the TensorFlow repository and move into the newly crea
 git clone --recurse-submodules https://github.com/tensorflow/tensorflow.git
 cd tensorflow
 ```
+Checkout the latest (at this time) STABLE version of Tensorflow, 1.5:
 
-_Note: if you're looking to build to a specific version or commit of TensorFlow (as opposed to the HEAD at master), you should `git checkout` it now. At this time, the latest stable release is V1.5, the hash is: 6a1ec9deeb2b04dc698db385ea582f6949b4f8bc_
+```shell
+git checkout 6a1ec9deeb2b04dc698db385ea582f6949b4f8bc
+```
 
 Once in the directory, we have to write a nifty one-liner that is incredibly important. The next line goes through all files and changes references of 64-bit program implementations (which we don't have access to) to 32-bit implementations. Neat!
 
