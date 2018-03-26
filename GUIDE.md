@@ -60,7 +60,7 @@ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 100
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 100
 ```
 
-Finally, for cleanliness, make a directory that will hold the Protobuf, Bazel, and TensorFlow repositories.
+Finally, for cleanliness, make a directory that will hold Bazel and TensorFlow repositories.
 
 ```shell
 mkdir tf
