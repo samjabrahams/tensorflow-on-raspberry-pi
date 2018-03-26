@@ -277,7 +277,7 @@ Do you wish to build TensorFlow with OpenCL support? [y/N] N
 Do you wish to build TensorFlow with CUDA support? [y/N] N
 ```
 
-_Note: if you want to build for Python 3, specify `/usr/bin/python3` for Python's location and `/usr/local/lib/python3.5/dist-packages` for the Python library path._
+_Note: Building for Python 3, specify `/usr/bin/python3` for Python's location and `/usr/local/lib/python3.5/dist-packages` for the Python library path._
 
 Bazel will now attempt to clean. This takes a really long time (and often ends up erroring out anyway), so you can send some keyboard interrupts (CTRL-C) to skip this and save some time.
 
@@ -298,7 +298,7 @@ bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
 And then install it!
 
 ```shell
-sudo pip install /tmp/tensorflow_pkg/tensorflow-1.1.0-cp27-none-linux_armv7l.whl
+sudo pip3 install /tmp/tensorflow_pkg/tensorflow-1.1.0-cp27-none-linux_armv7l.whl
 ```
 
 ### 5. Cleaning Up
