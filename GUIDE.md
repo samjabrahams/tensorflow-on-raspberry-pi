@@ -14,7 +14,7 @@ _[Back to readme](README.md)_
 
 ## Overview
 
-These instructions were crafted for a [Raspberry Pi 3 Model B](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/) running a vanilla copy of Raspbian 9.0 (stretch). Tensorflow is 1.5
+These instructions were crafted for a [Raspberry Pi 3 Model B](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/) running a vanilla copy of Raspbian 9.0 (stretch). Tensorflow is 1.5 and Python 3.5 (which comes on the Pi)
 
 Here's the basic plan: build a RPi-friendly version of [Bazel](https://github.com/bazelbuild/bazel) and use it to build TensorFlow.
 
@@ -28,8 +28,6 @@ Here's the basic plan: build a RPi-friendly version of [Bazel](https://github.co
 6. [References](#references)
 
 ## The Build
-
-### 0. Get Python 3.6 installed.
 
 ### 1. Install basic dependencies
 
