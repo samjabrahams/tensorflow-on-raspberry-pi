@@ -180,10 +180,10 @@ return "arm"
 ...
 ```
 
-You are going to need the Oracle Java JDK. (The openjdk version errors out):
+You are going to need the Oracle Java JDK. (The openjdk version errors out). Fetch it it [here](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
 ```shell
-TODO
+tar xvfz <your oracle jdk file>
 ```
 
 Now we can build Bazel! _Note: this also takes some time._
