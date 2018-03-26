@@ -4,7 +4,7 @@ _[Back to readme](README.md)_
 
 ## What You Need
 
-* Raspberry Pi 2 or 3 Model B
+* Raspberry Pi 3 Model B (only tested on 3)
 * An SD card running Raspbian with several GB of free space
 	* An 8 GB card with a fresh install of Raspbian **does not** have enough space. A 16 GB SD card minimum is recommended.
 	* These instructions may work on Linux distributions other than Raspbian
@@ -14,8 +14,7 @@ _[Back to readme](README.md)_
 
 ## Overview
 
-These instructions were crafted for a [Raspberry Pi 3 Model B](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/) running a vanilla copy of Raspbian 8.0 (jessie). It appears to work on Raspberry Pi 2, but [there are some kinks that are being worked out](https://github.com/tensorflow/tensorflow/issues/445#issuecomment-196021885). If these instructions work for different distributions, let me know!
-Updated (2017-09-11) to work with the latest (HEAD) version of tensorflow on Raspbian Strech (Vanilla version september 2017) and Python 3.5.
+These instructions were crafted for a [Raspberry Pi 3 Model B](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/) running a vanilla copy of Raspbian 9.0 (stretch). Tensorflow is 1.5
 
 Here's the basic plan: build a RPi-friendly version of [Bazel](https://github.com/bazelbuild/bazel) and use it to build TensorFlow.
 
@@ -29,6 +28,8 @@ Here's the basic plan: build a RPi-friendly version of [Bazel](https://github.co
 6. [References](#references)
 
 ## The Build
+
+### 0. Get Python 3.6 installed.
 
 ### 1. Install basic dependencies
 
