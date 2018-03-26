@@ -180,11 +180,7 @@ return "arm"
 ...
 ```
 
-You are going to need the Oracle Java JDK. (The openjdk version errors out). Fetch it it [here](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-
-```shell
-tar xvfz <your oracle jdk file>
-```
+You are going to need the Oracle Java JDK. (The openjdk version errors out). Fetch it it [here](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) with install instructions [here](https://raspberrypi.stackexchange.com/questions/4683/how-to-install-the-java-jdk-on-raspberry-pi)
 
 Now we can build Bazel! _Note: this also takes some time._
 
