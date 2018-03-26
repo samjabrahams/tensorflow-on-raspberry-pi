@@ -189,7 +189,7 @@ sudo update-alternatives --install "/usr/bin/java" "java" "/opt/jdk1.8.0/bin/jav
 sudo update-alternatives --install "/usr/bin/javac" "javac" "/opt/jdk1.8.0/bin/javac" 1
 ```
 
-Now we can build Bazel! _Note: this also takes some time._
+Now we can build Bazel! _Note: this also takes some time. At least two hours. Did you need to go on a few errands?._
 
 ```shell
 sudo ./compile.sh
