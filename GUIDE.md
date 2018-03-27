@@ -298,7 +298,7 @@ bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
 And then install it!
 
 ```shell
-sudo pip3 install /tmp/tensorflow_pkg/tensorflow-1.1.0-cp27-none-linux_armv7l.whl
+sudo pip3 install /tmp/tensorflow_pkg/tensorflow-1.5.1-cp35-cp35m-linux_armv7l.whl
 ```
 
 ### 5. Cleaning Up
