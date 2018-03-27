@@ -1,12 +1,12 @@
-# Installing TensorFlow on Raspberry Pi 3 (and probably 2 as well)
+# Installing TensorFlow on Raspberry Pi 3
 
-## Donate
+## Donate to Original Author
 
-If you find the binaries and instructions in this repository useful, [please consider donating to help keep this repository maintained](https://pledgie.com/campaigns/33260). It takes hours of work to compile each new version of TensorFlow, in addition to time spent responding to issues and pull requests.
+I (Keith) am not asking for donations, but the original author is. If you find the binaries and instructions in this repository useful, [please consider donating to him to help keep this repository maintained](https://pledgie.com/campaigns/33260). It takes hours of work to compile each new version of TensorFlow, in addition to time spent responding to issues and pull requests. 
 
 ## Intro
 
-If you're looking to run [fully featured TensorFlow](https://github.com/tensorflow/tensorflow) or [Bazel](https://github.com/bazelbuild/bazel) on a Raspberry Pi 3, you're in the right place. This repo contains step-by-step instructions for installing TensorFlow from source using Bazel (which is also compiled from-scratch), as well as pre-built TensorFlow binaries.
+If you're looking to run [fully featured TensorFlow](https://github.com/tensorflow/tensorflow) or [Bazel](https://github.com/bazelbuild/bazel) on a Raspberry Pi 3, you're in the right place. This repo contains step-by-step instructions for installing TensorFlow 1.5.1 from source using Bazel (which is also compiled from-scratch), as well as pre-built TensorFlow binaries.
 
 _As a quick note, if you're looking for officially supported TensorFlow/Raspberry Pi functionality, you can also check out using the [Makefile contrib module](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/makefile). It builds a static C++ library instead of the standard Python library, but is very powerful._
 
@@ -22,21 +22,16 @@ _As a quick note, if you're looking for officially supported TensorFlow/Raspberr
 
 **Note: These are unofficial binaries (though built from the minimally modified official source), and thus there is no expectation of support from the TensorFlow team. Please don't create issues for these files in the official TensorFlow repository.**
 
-This is the easiest way to get TensorFlow onto your Raspberry Pi 3. Note that currently, the pre-built binary is targeted for Raspberry Pi 3 running Raspbian 8.0 ("Jessie"), so this may or may not work for you. The specific OS release is the following:
+This is the easiest way to get TensorFlow onto your Raspberry Pi 3. Note that currently, the pre-built binary is targeted for Raspberry Pi 3 running Raspbian 9.0 ("Stretch"), so this may or may not work for you. The specific OS release is the following:
 
 ```
-Raspbian 8.0 "Jessie"
-Release: March 2, 2017
-Installed via NOOBS 2.3
+Raspbian 9.0 "Stretch"
 ```
 
 First, install the dependencies for TensorFlow:
 
 ```shell
 sudo apt-get update
-
-# For Python 2.7
-sudo apt-get install python-pip python-dev
 
 # For Python 3.3+
 sudo apt-get install python3-pip python3-dev
@@ -57,11 +52,7 @@ sudo pip3 install tensorflow-1.1.0-cp34-cp34m-linux_armv7l.whl
 Finally, we need to reinstall the `mock` library to keep it from throwing an error when we import TensorFlow:
 
 ```shell
-# For Python 2.7
-sudo pip uninstall mock
-sudo pip install mock
-
-# For Python 3.3+
+# For Python 3.5
 sudo pip3 uninstall mock
 sudo pip3 install mock
 ```

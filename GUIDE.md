@@ -4,7 +4,7 @@ _[Back to readme](README.md)_
 
 ## What You Need
 
-* Raspberry Pi 2 or 3 Model B
+* Raspberry Pi 3 Model B (only tested on 3)
 * An SD card running Raspbian with several GB of free space
 	* An 8 GB card with a fresh install of Raspbian **does not** have enough space. A 16 GB SD card minimum is recommended.
 	* These instructions may work on Linux distributions other than Raspbian
@@ -14,8 +14,7 @@ _[Back to readme](README.md)_
 
 ## Overview
 
-These instructions were crafted for a [Raspberry Pi 3 Model B](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/) running a vanilla copy of Raspbian 8.0 (jessie). It appears to work on Raspberry Pi 2, but [there are some kinks that are being worked out](https://github.com/tensorflow/tensorflow/issues/445#issuecomment-196021885). If these instructions work for different distributions, let me know!
-Updated (2017-09-11) to work with the latest (HEAD) version of tensorflow on Raspbian Strech (Vanilla version september 2017) and Python 3.5.
+These instructions were crafted for a [Raspberry Pi 3 Model B](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/) running a vanilla copy of Raspbian 9.0 (stretch). Tensorflow is 1.5 and Python 3.5 (which comes on the Pi)
 
 Here's the basic plan: build a RPi-friendly version of [Bazel](https://github.com/bazelbuild/bazel) and use it to build TensorFlow.
 
@@ -49,11 +48,6 @@ sudo apt-get install pkg-config zip g++ zlib1g-dev unzip
 For TensorFlow:
 
 ```
-# For Python 2.7
-sudo apt-get install python-pip python-numpy swig python-dev
-sudo pip install wheel
-
-# For Python 3.3+
 sudo apt-get install python3-pip python3-numpy swig python3-dev
 sudo pip3 install wheel
 ```
@@ -66,7 +60,7 @@ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 100
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 100
 ```
 
-Finally, for cleanliness, make a directory that will hold the Protobuf, Bazel, and TensorFlow repositories.
+Finally, for cleanliness, make a directory that will hold Bazel and TensorFlow repositories.
 
 ```shell
 mkdir tf
@@ -171,13 +165,13 @@ run "${JAVAC}" -classpath "${classpath}" -sourcepath "${sourcepath}" \
       -encoding UTF-8 "@${paramfile}" -J-Xmx500M
 ```
 
-Finally, we have to add one thing to `tools/cpp/cc_configure.bzl` - open it up for editing:
+Finally, we have to add one thing to `tools/cpp/lib_cc_configure.bzl` - open it up for editing:
 
 ```shell
-nano tools/cpp/cc_configure.bzl
+nano tools/cpp/lib_cc_configure.bzl
 ```
 
-Place the line `return "arm"` around line 133 (at the beginning of the `_get_cpu_value` function):
+Place the line `return "arm"` around line 93 (at the beginning of the `get_cpu_value` function):
 
 ```shell
 ...
@@ -186,7 +180,16 @@ return "arm"
 ...
 ```
 
-Now we can build Bazel! _Note: this also takes some time._
+You are going to need the Oracle Java JDK. (The openjdk version errors out). Fetch it it [here](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) with install instructions [here](https://raspberrypi.stackexchange.com/questions/4683/how-to-install-the-java-jdk-on-raspberry-pi)
+
+Make sure Bazel can find the Java JDK. Note in example below, per instructions linked above...
+
+```shell
+sudo update-alternatives --install "/usr/bin/java" "java" "/opt/jdk1.8.0/bin/java" 1
+sudo update-alternatives --install "/usr/bin/javac" "javac" "/opt/jdk1.8.0/bin/javac" 1
+```
+
+Now we can build Bazel! _Note: this also takes some time. At least two hours. Did you need to go on a few errands?._
 
 ```shell
 sudo ./compile.sh
@@ -246,67 +249,19 @@ First things first, clone the TensorFlow repository and move into the newly crea
 git clone --recurse-submodules https://github.com/tensorflow/tensorflow.git
 cd tensorflow
 ```
+Checkout the latest (at this time) STABLE version of Tensorflow, 1.5:
 
-_Note: if you're looking to build to a specific version or commit of TensorFlow (as opposed to the HEAD at master), you should `git checkout` it now._
+```shell
+git checkout v1.5.1
+```
 
 Once in the directory, we have to write a nifty one-liner that is incredibly important. The next line goes through all files and changes references of 64-bit program implementations (which we don't have access to) to 32-bit implementations. Neat!
 
 ```shell
 grep -Rl 'lib64' | xargs sed -i 's/lib64/lib/g'
 ```
-Updating tensorflow/core/platform/platform.h and WORKSPACE as listed in the previous version is no longer needed with the latest version of tensorflow.
-* the IS_MOBILE_PLATFORM check now includes a specific check for the Raspberry
-* numeric/1.2.6 is no longer listed WORKSPACE
 
-Finally, we have to replace the eigen version dependency. The version included in the current tensorflow version may result in an error (near the end of the build):
-
-```shell
-ERROR: /mnt/tensorflow/tensorflow/core/kernels/BUILD:2128:1: C++ compilation of rule '//tensorflow/core/kernels:svd_op' failed: gcc failed: error executing command 
-...com.google.devtools.build.lib.shell.BadExitStatusException: Process exited with status 1.
-...
-external/eigen_archive/Eigen/src/Jacobi/Jacobi.h:359:55: error: 'struct Eigen::internal::conj_helper<__vector(4) __builtin_neon_sf, Eigen::internal::Packet2cf, false, false>' has no member named 'pmul'
-```
-
-to resolve this 
-
-```shell
-sudo nano tensorflow/workspace.bzl
-```
-
-Replace the following
-
-```
-  native.new_http_archive(
-      name = "eigen_archive",
-      urls = [
-          "http://mirror.bazel.build/bitbucket.org/eigen/eigen/get/f3a22f35b044.tar.gz",
-          "https://bitbucket.org/eigen/eigen/get/f3a22f35b044.tar.gz",
-      ],
-      sha256 = "ca7beac153d4059c02c8fc59816c82d54ea47fe58365e8aded4082ded0b820c4",
-      strip_prefix = "eigen-eigen-f3a22f35b044",
-      build_file = str(Label("//third_party:eigen.BUILD")),
-  )
-```
-
-with
-
-```
-  native.new_http_archive(
-      name = "eigen_archive",
-      urls = [
-          "http://mirror.bazel.build/bitbucket.org/eigen/eigen/get/d781c1de9834.tar.gz",
-          "https://bitbucket.org/eigen/eigen/get/d781c1de9834.tar.gz",
-      ],
-      sha256 = "a34b208da6ec18fa8da963369e166e4a368612c14d956dd2f9d7072904675d9b",
-      strip_prefix = "eigen-eigen-d781c1de9834",
-      build_file = str(Label("//third_party:eigen.BUILD")),
-  )
-```
-
-Reference: https://stackoverflow.com/questions/44418657/how-to-build-eigen-with-arm-neon-compile-error-for-tensorflow
-
-**These options have changed with exception of jemalloc use No for all**
-Now let's configure the build:
+Now let's configure the build. **These options have changed with exception of jemalloc use No for all**
 
 ```shell
 ./configure
@@ -322,7 +277,7 @@ Do you wish to build TensorFlow with OpenCL support? [y/N] N
 Do you wish to build TensorFlow with CUDA support? [y/N] N
 ```
 
-_Note: if you want to build for Python 3, specify `/usr/bin/python3` for Python's location and `/usr/local/lib/python3.5/dist-packages` for the Python library path._
+_Note: Building for Python 3, specify `/usr/bin/python3` for Python's location and `/usr/local/lib/python3.5/dist-packages` for the Python library path._
 
 Bazel will now attempt to clean. This takes a really long time (and often ends up erroring out anyway), so you can send some keyboard interrupts (CTRL-C) to skip this and save some time.
 
@@ -343,7 +298,7 @@ bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
 And then install it!
 
 ```shell
-sudo pip install /tmp/tensorflow_pkg/tensorflow-1.1.0-cp27-none-linux_armv7l.whl
+sudo pip3 install /tmp/tensorflow_pkg/tensorflow-1.5.1-cp35-cp35m-linux_armv7l.whl
 ```
 
 ### 5. Cleaning Up
