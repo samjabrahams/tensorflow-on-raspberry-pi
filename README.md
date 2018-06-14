@@ -1,5 +1,9 @@
 # Installing TensorFlow on Raspberry Pi 3 (and probably 2 as well)
 
+## Notice:
+
+The binaries on this repo are outdated. To get the latest prebuilt tensorflow on a raspberry pi use [piwheels](https://github.com/bennuttall/piwheels), [nightly tensorflow builds](http://ci.tensorflow.org/job/nightly-pi-python3/), or [tensorflow-on-arm](https://github.com/lhelontra/tensorflow-on-arm/releases).
+
 ## Donate
 
 If you find the binaries and instructions in this repository useful, [please consider donating to help keep this repository maintained](https://pledgie.com/campaigns/33260). It takes hours of work to compile each new version of TensorFlow, in addition to time spent responding to issues and pull requests.
