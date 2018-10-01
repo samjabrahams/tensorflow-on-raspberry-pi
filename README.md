@@ -2,7 +2,7 @@
 
 ## Donate
 
-If you find the binaries and instructions in this repository useful, [please consider donating to help keep this repository maintained](https://pledgie.com/campaigns/33260). It takes hours of work for each new version of TensorFlow, as well as responding to issues and pull requests.
+If you find the binaries and instructions in this repository useful, [please consider donating to help keep this repository maintained](https://pledgie.com/campaigns/33260). It takes hours of work to compile each new version of TensorFlow, in addition to time spent responding to issues and pull requests.
 
 ## Intro
 
@@ -25,25 +25,37 @@ This is the easiest way to get TensorFlow onto your Raspberry Pi 3. Note that cu
 First, install the dependencies for TensorFlow:
 
 ```shell
-$ sudo apt-get update
+sudo apt-get update
 
 # For Python 2.7
-$ sudo apt-get install python-pip python-dev
+sudo apt-get install python-pip python-dev
 
 # For Python 3.3+
-$ sudo apt-get install python3-pip python3-dev
+sudo apt-get install python3-pip python3-dev
 ```
 
 Next, download the wheel file from this repository and install it:
 
 ```shell
 # For Python 2.7
-$ wget https://github.com/samjabrahams/tensorflow-on-raspberry-pi/releases/download/v0.12.1/tensorflow-0.12.1-cp27-none-linux_armv7l.whl
-$ sudo pip install tensorflow-0.12.1-cp27-none-linux_armv7l.whl
+wget https://github.com/samjabrahams/tensorflow-on-raspberry-pi/releases/download/v1.0.1/tensorflow-1.0.1-cp27-none-linux_armv7l.whl
+pip install --user tensorflow-1.0.1-cp27-none-linux_armv7l.whl
+
+# For Python 3.4
+wget https://github.com/samjabrahams/tensorflow-on-raspberry-pi/releases/download/v1.0.1/tensorflow-1.0.1-cp34-cp34m-linux_armv7l.whl
+pip3 install --user tensorflow-1.0.1-cp34-cp34m-linux_armv7l.whl
+```
+
+Finally, we need to reinstall the `mock` library to keep it from throwing an error when we import TensorFlow:
+
+```shell
+# For Python 2.7
+pip uninstall mock
+pip install --user mock
 
 # For Python 3.3+
-$ wget https://github.com/samjabrahams/tensorflow-on-raspberry-pi/releases/download/v0.12.1/tensorflow-0.12.1-py3-none-any.whl
-$ sudo pip3 install tensorflow-0.12.1-py3-none-any.whl
+pip3 uninstall mock
+pip3 install --user mock
 ```
 
 And that should be it!
@@ -56,19 +68,21 @@ Instructions on setting up a Docker image to run on Raspberry Pi are being maint
 
 _This section will attempt to maintain a list of remedies for problems that may occur while installing from `pip`_
 
-#### "tensorflow-0.11-cp27-none-linux_armv7l.whl is not a supported wheel on this platform."
+#### "tensorflow-1.0.1-cp27-none-linux_armv7l.whl is not a supported wheel on this platform."
 
 This wheel was built with Python 2.7, and can't be installed with a version of `pip` that uses Python 3. If you get the above message, try running the following command instead:
 
 ```
-$ sudo pip2 install tensorflow-0.12.1-cp27-none-linux_armv7l.whl
+sudo pip2 install tensorflow-1.0.1-cp27-none-linux_armv7l.whl
 ```
 
-Vice-versa for trying to install the Python 3 wheel. If you get the error "tensorflow-0.11-py3-none-any.whl is not a supported wheel on this platform.", try this command:
+Vice-versa for trying to install the Python 3 wheel. If you get the error "tensorflow-1.0.1-cp34-cp34m-any.whl is not a supported wheel on this platform.", try this command:
 
 ```
-$ sudo pip3 install tensorflow-0.12.1-py3-none-any.whl
+pip3 install --user tensorflow-1.0.1-cp34-cp34m-linux_armv7l.whl
 ```
+
+**Note: the provided binaries are for Python 2.7 and 3.4 _only_. If you've installed Python 3.5/3.6 from source on your machine, you'll need to either explicitly install these wheels for 3.4, or you'll need to build TensorFlow [from source](GUIDE.md). Once there's an officially supported installation of Python 3.5+, this repo will start including wheels for those versions.**
 
 ## Building from Source
 

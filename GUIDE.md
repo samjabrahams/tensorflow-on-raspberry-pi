@@ -22,11 +22,10 @@ Here's the basic plan: build a 32-bit version of [Protobuf](https://github.com/g
 
 1. [Install basic dependencies](#1-install-basic-dependencies)
 2. [Build Protobuf](#2-build-protobuf)
-3. [Build gRPC](#3-build-grpc)
-3. [Build Bazel](#4-build-bazel)
-4. [Install USB Memory as Swap](#5-install-a-memory-drive-as-swap-for-compiling)
-5. [Compiling TensorFlow](#6-compiling-tensorflow)
-6. [Cleaning Up](#7-cleaning-up)
+3. [Install USB Memory as Swap](#3-install-a-memory-drive-as-swap-for-compiling)
+4. [Build Bazel](#4-build-bazel)
+5. [Compiling TensorFlow](#5-compiling-tensorflow)
+6. [Cleaning Up](#6-cleaning-up)
 7. [References](#references)
 
 ## The Build
@@ -50,7 +49,9 @@ sudo apt-get install autoconf automake libtool maven
 For Bazel:
 
 ```shell
-sudo apt-get install pkg-config zip g++ zlib1g-dev unzip
+sudo apt-get install pkg-config zip g++ zlib1g-dev unzip openjdk-8-jdk
+# Select the java-8-openjdk option for the update-alternatives command
+sudo update-alternatives --config java
 ```
 
 For TensorFlow:
@@ -58,11 +59,11 @@ For TensorFlow:
 ```
 # For Python 2.7
 sudo apt-get install python-pip python-numpy swig python-dev
-sudo pip install wheel
+pip install --user wheel
 
 # For Python 3.3+
 sudo apt-get install python3-pip python3-numpy swig python3-dev
-sudo pip3 install wheel
+pip3 install --user wheel
 ```
 
 To be able to take advantage of certain optimization flags:
@@ -92,7 +93,7 @@ Now move into the new `protobuf` directory, configure it, and `make` it. _Note: 
 
 ```shell
 cd protobuf
-git checkout v3.0.0
+git checkout v3.1.0
 ./autogen.sh
 ./configure
 make -j 4
@@ -106,117 +107,13 @@ Great! You should now have `protoc` installed in `/usr/local/bin`, and should be
 protoc --version
 ```
 
-Now that we have the `protoc` compiler, we can start building Bazel. Let's move up a directory and do that.
+Now that we have the `protoc` compiler, let's install a USB stick as additional swap memory.
 
 ```
 cd ..
 ```
 
-### 3. Build Bazel
-
-To build [Bazel](https://github.com/bazelbuild/bazel), we're going to need to download a zip file containing a distribution archive. Let's do that now and extract it into a new directory called `bazel`:
-
-```shell
-wget https://github.com/bazelbuild/bazel/releases/download/0.4.3/bazel-0.4.3-dist.zip
-unzip -d bazel bazel-0.4.3-dist.zip
-```
-
-Once it's done downloading and extracting, we can move into the directory to make a few changes:
-
-```shell
-cd bazel
-```
-
-Before building Bazel, we need to set the `javac` maximum heap size for this job, or else we'll get an OutOfMemoryError. To do this, we need to make a small addition to `bazel/scripts/bootstrap/compile.sh`. (Shout-out to @SangManLINUX for [pointing this out.](https://github.com/samjabrahams/tensorflow-on-raspberry-pi/issues/5#issuecomment-210965695).
-
-```shell
-nano scripts/bootstrap/compile.sh
-```
-
-Move down to line 137, where you'll see the following block of code:
-
-```shell
-run "${JAVAC}" -classpath "${classpath}" -sourcepath "${sourcepath}" \
-      -d "${output}/classes" -source "$JAVA_VERSION" -target "$JAVA_VERSION" \
-      -encoding UTF-8 "@${paramfile}"
-```
-
-At the end of this block, add in the `-J-Xmx500M` flag, which sets the maximum size of the Java heap to 500 MB:
-
-```
-run "${JAVAC}" -classpath "${classpath}" -sourcepath "${sourcepath}" \
-      -d "${output}/classes" -source "$JAVA_VERSION" -target "$JAVA_VERSION" \
-      -encoding UTF-8 "@${paramfile}" -J-Xmx500M
-```
-
-Finally, we have to add one thing to `tools/cpp/cc_configure.bzl` - open it up for editing:
-
-```shell
-nano tools/cpp/cc_configure.bzl
-```
-
-Place the line `return "arm"` around line 141 (at the beginning of the `_get_cpu_value` function):
-
-```shell
-...
-"""Compute the cpu_value based on the OS name."""
-return "arm"
-...
-```
-
-Now we can build Bazel! _Note: this also takes some time._
-
-```shell
-sudo ./compile.sh
-```
-
-When the build finishes, you end up with a new binary, `output/bazel`. Copy that to your `/usr/local/bin` directory.
-
-```shell
-sudo cp output/bazel /usr/local/bin/bazel
-```
-
-To make sure it's working properly, run `bazel` on the command line and verify it prints help text. Note: this may take 15-30 seconds to run, so be patient!
-
-```shell
-$ bazel
-
-Usage: bazel <command> <options> ...
-
-Available commands:
-  analyze-profile     Analyzes build profile data.
-  build               Builds the specified targets.
-  canonicalize-flags  Canonicalizes a list of bazel options.
-  clean               Removes output files and optionally stops the server.
-  dump                Dumps the internal state of the bazel server process.
-  fetch               Fetches external repositories that are prerequisites to the targets.
-  help                Prints help for commands, or the index.
-  info                Displays runtime info about the bazel server.
-  mobile-install      Installs targets to mobile devices.
-  query               Executes a dependency graph query.
-  run                 Runs the specified target.
-  shutdown            Stops the bazel server.
-  test                Builds and runs the specified test targets.
-  version             Prints version information for bazel.
-
-Getting more help:
-  bazel help <command>
-                   Prints help and options for <command>.
-  bazel help startup_options
-                   Options for the JVM hosting bazel.
-  bazel help target-syntax
-                   Explains the syntax for specifying targets.
-  bazel help info-keys
-                   Displays a list of keys used by the info command.
-```
-
-Move out of the `bazel` directory, and we'll move onto the next step.
-
-```shell
-cd ..
-```
-
-### 4. Install a Memory Drive as Swap for Compiling
+### 3. Install a Memory Drive as Swap for Compiling
 
 In order to succesfully build TensorFlow, your Raspberry Pi needs a little bit more memory to fall back on. Fortunately, this process is pretty straightforward. Grab a USB storage drive that has at least 1GB of memory. I used a flash drive I could live without that carried no important data. That said, we're only going to be using the drive as swap while we compile, so this process shouldn't do too much damage to a relatively new USB drive.
 
@@ -277,12 +174,116 @@ sudo nano /etc/fstab
 
 Alright! You've got swap! Don't throw out the `/dev/XXX` information yet- you'll need it to remove the device safely later on.
 
+### 4. Build Bazel
+
+To build [Bazel](https://github.com/bazelbuild/bazel), we're going to need to download a zip file containing a distribution archive. Let's do that now and extract it into a new directory called `bazel`:
+
+```shell
+wget https://github.com/bazelbuild/bazel/releases/download/0.4.3/bazel-0.4.3-dist.zip
+unzip -d bazel bazel-0.4.3-dist.zip
+```
+
+Once it's done downloading and extracting, we can move into the directory to make a few changes:
+
+```shell
+cd bazel
+```
+
+Before building Bazel, we need to set the `javac` maximum heap size for this job, or else we'll get an OutOfMemoryError. To do this, we need to make a small addition to `bazel/scripts/bootstrap/compile.sh`. (Shout-out to @SangManLINUX for [pointing this out.](https://github.com/samjabrahams/tensorflow-on-raspberry-pi/issues/5#issuecomment-210965695).
+
+```shell
+nano scripts/bootstrap/compile.sh
+```
+
+Move down to line 137, where you'll see the following block of code:
+
+```shell
+run "${JAVAC}" -classpath "${classpath}" -sourcepath "${sourcepath}" \
+      -d "${output}/classes" -source "$JAVA_VERSION" -target "$JAVA_VERSION" \
+      -encoding UTF-8 "@${paramfile}"
+```
+
+At the end of this block, add in the `-J-Xmx500M` flag, which sets the maximum size of the Java heap to 500 MB:
+
+```
+run "${JAVAC}" -classpath "${classpath}" -sourcepath "${sourcepath}" \
+      -d "${output}/classes" -source "$JAVA_VERSION" -target "$JAVA_VERSION" \
+      -encoding UTF-8 "@${paramfile}" -J-Xmx500M
+```
+
+Finally, we have to add one thing to `tools/cpp/cc_configure.bzl` - open it up for editing:
+
+```shell
+nano tools/cpp/cc_configure.bzl
+```
+
+Place the line `return "arm"` around line 133 (at the beginning of the `_get_cpu_value` function):
+
+```shell
+...
+"""Compute the cpu_value based on the OS name."""
+return "arm"
+...
+```
+
+Now we can build Bazel! _Note: this also takes some time._
+
+```shell
+sudo ./compile.sh
+```
+
+When the build finishes, you end up with a new binary, `output/bazel`. Copy that to your `/usr/local/bin` directory.
+
+```shell
+sudo cp output/bazel /usr/local/bin/bazel
+```
+
+To make sure it's working properly, run `bazel` on the command line and verify it prints help text. Note: this may take 15-30 seconds to run, so be patient!
+
+```shell
+bazel
+
+Usage: bazel <command> <options> ...
+
+Available commands:
+  analyze-profile     Analyzes build profile data.
+  build               Builds the specified targets.
+  canonicalize-flags  Canonicalizes a list of bazel options.
+  clean               Removes output files and optionally stops the server.
+  dump                Dumps the internal state of the bazel server process.
+  fetch               Fetches external repositories that are prerequisites to the targets.
+  help                Prints help for commands, or the index.
+  info                Displays runtime info about the bazel server.
+  mobile-install      Installs targets to mobile devices.
+  query               Executes a dependency graph query.
+  run                 Runs the specified target.
+  shutdown            Stops the bazel server.
+  test                Builds and runs the specified test targets.
+  version             Prints version information for bazel.
+
+Getting more help:
+  bazel help <command>
+                   Prints help and options for <command>.
+  bazel help startup_options
+                   Options for the JVM hosting bazel.
+  bazel help target-syntax
+                   Explains the syntax for specifying targets.
+  bazel help info-keys
+                   Displays a list of keys used by the info command.
+```
+
+Move out of the `bazel` directory, and we'll move onto the next step.
+
+```shell
+cd ..
+```
+
 ### 5. Compiling TensorFlow
 
 First things first, clone the TensorFlow repository and move into the newly created directory.
 
 ```shell
-git clone --recurse-submodules https://github.com/tensorflow/tensorflow
+git clone --recurse-submodules https://github.com/tensorflow/tensorflow.git
 cd tensorflow
 ```
 
@@ -297,7 +298,7 @@ grep -Rl 'lib64' | xargs sed -i 's/lib64/lib/g'
 Next, we need to delete a particular line in `tensorflow/core/platform/platform.h`. Open up the file in your favorite text editor:
 
 ```shell
-$ sudo nano tensorflow/core/platform/platform.h
+sudo nano tensorflow/core/platform/platform.h
 ```
 
 Now, scroll down toward the bottom and delete the following line containing `#define IS_MOBILE_PLATFORM` (around line 48):
@@ -311,10 +312,25 @@ Now, scroll down toward the bottom and delete the following line containing `#de
 
 This keeps our Raspberry Pi device (which has an ARM CPU) from being recognized as a mobile device.
 
+Finally, we have to adjust the protocol to access the Numeric JS library- for some reason the Cloudflare security certificates don't work properly over `https`. We'll need to fix this in the Bazel `WORKSPACE` file:
+
+```shell
+sudo nano WORKSPACE
+```
+
+Around line 283, change `https` to `http`:
+
+```
+http_file(
+  name = "numericjs_numeric_min_js",
+  url = "http://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js",
+)
+```
+
 Now let's configure the build:
 
 ```shell
-$ ./configure
+./configure
 
 Please specify the location of python. [Default is /usr/bin/python]: /usr/bin/python
 Do you wish to build TensorFlow with Google Cloud Platform support? [y/N] N
@@ -323,9 +339,9 @@ Do you wish to build TensorFlow with Hadoop File System support? [y/N] N
 Please input the desired Python library path to use. Default is [/usr/local/lib/python2.7/dist-packages]
 Do you wish to build TensorFlow with OpenCL support? [y/N] N
 Do you wish to build TensorFlow with GPU support? [y/N] 
-N```
+```
 
-_Note: if you want to build for Python 3, specify `/usr/bin/python3` for Python's location._
+_Note: if you want to build for Python 3, specify `/usr/bin/python3` for Python's location and `/usr/local/lib/python3.4/dist-packages` for the Python library path._
 
 Now we can use it to build TensorFlow! **Warning: This takes a really, really long time. Several hours.**
 
@@ -344,7 +360,7 @@ bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
 And then install it!
 
 ```shell
-sudo pip install /tmp/tensorflow_pkg/tensorflow-0.12.1-cp27-none-linux_armv7l.whl
+pip install --user /tmp/tensorflow_pkg/tensorflow-1.0.1-cp27-none-linux_armv7l.whl
 ```
 
 ### 6. Cleaning Up
