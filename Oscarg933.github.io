@@ -1,0 +1,7 @@
+.anaconda
+
+.iota
+
+.sensei
+
+.picasso
